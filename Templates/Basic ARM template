@@ -76,6 +76,9 @@
                 "sku": {
                     "name": "Standard_LRS"
                 },
+                "tags": {
+                    "RampUpStep": "[variables('Stepnumber')[0]]"
+                },
                 "kind": "StorageV2",
                 "properties": {
                     "largeFileSharesState": "Enabled"
