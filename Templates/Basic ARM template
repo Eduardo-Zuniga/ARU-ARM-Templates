@@ -30,7 +30,7 @@
         "deployerName": {
             "$ref": "#/definitions/creatorType",
             "metadata": {
-                "description": "Name of person who is deploying resources"
+                "description": "Identifier for person who is deploying resources"
             }
         }
     },
