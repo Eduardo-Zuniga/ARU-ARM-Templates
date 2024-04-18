@@ -16,7 +16,7 @@
         "deployerName": {
             "type": "string",
             "metadata": {
-                "description": "Name of person who is deploying resources"
+                "description": "Identifier for the person who is deploying resources"
             }
         },
         "contDataType":{
