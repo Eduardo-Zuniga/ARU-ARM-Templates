@@ -1,0 +1,62 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters":{
+        "vaultName":{
+            "type": "string",
+            "defaultValue": "vaultARU"
+        },
+        "location":{
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "tenantId":{
+            "type": "string"
+        },
+        "skuName":{
+            "type": "string",
+            "defaultValue": "standard",
+            "metadata":{
+                "description": "Sku to be used by the vault."
+            },
+            "allowedValues":[
+                "standard",
+                "premium"
+            ]
+        },
+        "creatorOID": {
+            "type": "string",
+            "metadata":{
+                "description": "Object ID that will have full access to the vault."
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('vaultName')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "tenantId": "[parameters('tenantId')]",
+                "sku": {
+                    "family": "A",
+                    "name": "[parameters('skuName')]"
+                },
+                "accessPolicies": [
+                    {
+                        "objectId": "[parameters('creatorOID')]",
+                        "permissions": {
+                            "certificates": [ "all" ],
+                            "keys": [ "all" ],
+                            "secrets": [ "all" ],
+                            "storage": [ "all" ]
+                        },
+                        "tenantId": "[parameters('tenantId')]"
+                    }
+                ],
+                "enableSoftDelete": "false"
+            }
+        }
+    ]
+}
