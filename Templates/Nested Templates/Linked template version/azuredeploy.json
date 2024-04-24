@@ -1,0 +1,153 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "languageVersion": "2.0",
+    "apiProfile": "2018–03-01-hybrid",
+    "definitions": {
+        "creatorType": {
+            "type": "string",
+            "maxLength": 13,
+            "minLength": 4,
+            "metadata": {
+                "description": "Expects an identifier of the creator (v-) to name resources after, please refrain from adding the '-' to avoid issues with the naming convention of the multiple resources deployed."
+            }
+        }
+    },
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Specifies the location in which the Azure resources should be deployed."
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name for the storage account to deploy."
+            }
+        },
+        "deployerName": {
+            "$ref": "#/definitions/creatorType",
+            "defaultValue": "veduardoz",
+            "metadata": {
+                "description": "Name of person who is deploying resources."
+            }
+        },
+        "vaultName":{
+            "type": "string",
+            "defaultValue": "vaultARU",
+            "metadata": {
+                "description": "Name for the vault to create, avoid using '-'."
+            }
+        },
+        "tenantId":{
+            "type": "string",
+            "metadata": {
+                "description": "Tenant Id to use for the keyvault and it's access policies."
+            }
+        },
+        "skuName":{
+            "type": "string",
+            "defaultValue": "standard",
+            "metadata":{
+                "description": "Sku to be used by the vault."
+            },
+            "allowedValues":[
+                "standard",
+                "premium"
+            ]
+        },
+        "creatorOID": {
+            "type": "string",
+            "metadata":{
+                "description": "Object ID that will have full access to the vault."
+            }
+        }
+    },
+    "functions": [
+        {
+            "namespace": "customNames",
+            "members": {
+                "uniqueName": {
+                    "parameters": [
+                        {
+                            "name": "specificPrefix",
+                            "type": "string"
+                        },
+                        {
+                            "name": "creatorName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[toLower(concat(parameters('specificPrefix'),parameters('creatorName')))]"
+                    }
+                }
+            }
+        }
+    ],
+    "variables": {
+        "Stepnumber": [
+            "Basic ARM template",
+            "Child resources",
+            "Nested templates",
+            "Multiple instances",
+            "Conditional templates",
+            "Deployment scripts"
+        ]
+    },
+    "resources": 
+        {
+            "storageARU": {
+                "type": "Microsoft.Storage/storageAccounts",
+                "apiVersion": "2022-09-01",
+                "name": "[customNames.uniqueName(parameters('storageAccountName'),parameters('deployerName'))]",
+                "location": "[parameters('location')]",
+                "sku": {
+                    "name": "Standard_LRS"
+                },
+                "kind": "StorageV2",
+                "properties": {
+                    "largeFileSharesState": "Enabled"
+                },
+                "tags": {
+                    "RampUpStep": "[variables('Stepnumber')[0]]",
+                    "test": "1"
+                }
+            },
+            "storageContNested": {
+                "type": "Microsoft.Resources/deployments",
+                "apiVersion": "2022-09-01",
+                "name": "nestedTemplate1",
+                "properties": {
+                    "mode": "Incremental",
+                    "templateLink": {
+                        "uri":"https://raw.githubusercontent.com/Eduardo-Zuniga/ARU-ARM-Templates/main/Templates/Rerefence/vaultARU",
+                        "contentVersion":"1.0.0.0"
+                    },
+                    "parameters": {
+                        "vaultName":{
+                            "value": "[parameters('vaultName')]"
+                        },
+                        "tenantId":{
+                            "value": "[parameters('tenantId')]"
+                        },
+                        "skuName":{
+                            "value": "[parameters('skuName')]"
+                        },
+                        "creatorOID": {
+                            "value": "[parameters('creatorOID')]"
+                        }
+                    }
+                }
+            }
+        },
+    "outputs": {
+        "RampUpStep": {
+            "type": "string",
+            "value": "[variables('Stepnumber')[2]]"
+        }
+    }
+}
