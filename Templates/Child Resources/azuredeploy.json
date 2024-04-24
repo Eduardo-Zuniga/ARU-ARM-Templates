@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Specifies the location in which the resources should be deployed."
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": "StorageARU"
+        },
+        "deployerName": {
+            "type": "string",
+            "metadata": {
+                "description": "Identifier for the person who is deploying resources"
+            }
+        },
+        "contDataType":{
+            "type": "string",
+            "defaultValue": "General",
+            "metadata": {
+                "description": "Type of data stored in the container Ex. Logs"
+            }
+        }
+    },
+    "functions": [
+        {
+            "namespace": "customNames",
+            "members": {
+                "uniqueName": {
+                    "parameters": [
+                        {
+                            "name": "specificPrefix",
+                            "type": "string"
+                        },
+                        {
+                            "name": "creatorName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[toLower(concat(parameters('specificPrefix'),parameters('creatorName')))]"
+                    }
+                },
+                "contnameconcated":{
+                    "parameters": [
+                        {
+                            "name": "dataContained",
+                            "type": "string"
+                        },
+                        {
+                            "name": "creatorName",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[toLower(concat('default/', parameters('creatorName'), '-', parameters('dataContained')))]"
+                    }
+                }
+            }
+        }
+    ],
+    "variables": {
+        "Stepnumber": [
+            "Basic ARM template",
+            "Child resources",
+            "Nested templates",
+            "Multiple instances",
+            "Conditional templates",
+            "Deployment scripts"
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2022-09-01",
+            "name": "[customNames.uniqueName(parameters('storageAccountName'),parameters('deployerName'))]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "largeFileSharesState": "Enabled"
+            },
+            "tags": {
+                "RampUpStep": "[variables('Stepnumber')[1]]"
+            },
+            "resources": [
+                {
+                    "type": "blobServices/containers",
+                    "apiVersion": "2023-01-01",
+                    "name": "[customNames.contnameconcated(parameters('contDataType'),'ARU')]",
+                    "dependsOn": [
+                        "[customNames.uniqueName(parameters('storageAccountName'),parameters('deployerName'))]"
+                    ]
+                }
+            ]
+        }
+    ],
+    "outputs": {
+        "RampUpStep": {
+            "type": "string",
+            "value": "[variables('Stepnumber')[1]]"
+        }
+    }
+}
