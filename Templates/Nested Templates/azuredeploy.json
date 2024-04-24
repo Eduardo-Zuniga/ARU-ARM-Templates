@@ -39,10 +39,6 @@
             "type": "string",
             "defaultValue": "vaultARU"
         },
-        "location":{
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]"
-        },
         "tenantId":{
             "type": "string"
         },
