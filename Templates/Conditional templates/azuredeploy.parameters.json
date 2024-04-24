@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "value": "storageARU"
+        },
+        "containerName":{
+            "value": "General"
+        },
+        "kvNeeded":{
+            "value": "new"
+        },
+        "creatorOID":{
+            "value": "Your-OID"
+        },
+        "addOID":{
+            "value": "None"
+        },
+        "deployerName":{
+            "value": "test"
+        },
+        "vaultName":{
+            "value": "vaultARU"
+        },
+        "tenantId":{
+            "value": "Your-tenant-ID"
+        },
+        "skuName":{
+            "value": "standard"
+        }
+    }
+  }
