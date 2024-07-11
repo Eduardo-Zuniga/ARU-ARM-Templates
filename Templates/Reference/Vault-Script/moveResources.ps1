@@ -145,7 +145,7 @@ $content.properties.sku | add-member -MemberType NoteProperty -Name "family" -va
 $content.properties.sku | add-member -MemberType NoteProperty -Name "name" -value "standard" -force
 
 #Setting storage context and getting base template from blob
-$Context = New-AzureStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountSASKey
+$Context = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountSASKey
 $template =  Get-AzStorageBlobContent -Container $baseTemplateContainerName -Blob $baseTemplateName -Context $context -Force
 
 #This variable contains the base template and is converted to psobject to edit
@@ -182,14 +182,8 @@ $end =  Get-AzStorageBlobContent -Container $OperationsContainerName -Blob "newA
 Remove-AzKeyVault -Name $vault.ToString() -ResourceGroupName $OriginRG -Force
 
 #Purging the deleted vault 
-
 $purgeURI = "https://management.azure.com/subscriptions/{0}/providers/Microsoft.KeyVault/locations/{1}/deletedVaults/{2}/purge?api-version=2022-07-01" -f $subID, $vaultLocation, $OriginKeyvaultName 
-
 Invoke-RestMethod -uri $purgeURI -method Post -headers $authHeader
-
-
-
-
 
 #Deploy on the new resource group
 New-AzResourceGroupDeployment -Resourcegroupname v-eduardoz -templatefile $end.name -Force
