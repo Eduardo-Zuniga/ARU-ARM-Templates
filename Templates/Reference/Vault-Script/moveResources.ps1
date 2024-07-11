@@ -57,34 +57,34 @@ param
         [string] $subID,
 
     [Parameter(Mandatory=$true)]
-        [string] $OriginRG
+        [string] $OriginRG,
 
     [Parameter(Mandatory=$true)]
-        [string] $OriginKeyvaultName
+        [string] $OriginKeyvaultName,
 
     [Parameter(Mandatory=$false)]
-        [string] $KVrestAPIVersion = "2022-07-01"
+        [string] $KVrestAPIVersion = "2022-07-01",
 
     [Parameter(Mandatory=$true)]
-        [string] $TargetRG
+        [string] $TargetRG,
 
     [Parameter(Mandatory=$false)]
-        [string] $NameIFTooLong 
+        [string] $NameIFTooLong,
 
     [Parameter(Mandatory=$false)]
-        [string] $KVApiVersion = "2019-09-01"
+        [string] $KVApiVersion = "2019-09-01",
 
     [Parameter(Mandatory=$true)]
-        [string] $storageAccountName
+        [string] $storageAccountName,
 
     [Parameter(Mandatory=$true)]
-        [string] $storageAccountSASKey
+        [string] $storageAccountSASKey,
 
     [Parameter(Mandatory=$true)]
-        [string] $baseTemplateContainerName
+        [string] $baseTemplateContainerName,
 
     [Parameter(Mandatory=$false)]
-        [string] $OperationsContainerName = $baseTemplateContainerName
+        [string] $OperationsContainerName = $baseTemplateContainerName,
 
     [Parameter(Mandatory=$true)]
         [string] $baseTemplateName
