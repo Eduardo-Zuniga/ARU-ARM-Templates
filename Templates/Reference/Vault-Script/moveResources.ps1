@@ -173,7 +173,7 @@ $deploy = $newTemplate | convertTo-Json -depth 100
 
 $url = "newAzureDeploy.json"
 set-content -path $url -value $deploy                       
-Set-AzureStorageBlobContent -Context $Context -Container $OperationsContainerName -File $url -Force
+Set-AzStorageBlobContent -Context $Context -Container $OperationsContainerName -File $url -Force
 
 #getting the value of the template itself on a variable and downloading to current context
 $end =  Get-AzStorageBlobContent -Container $OperationsContainerName -Blob "newAzureDeploy.json" -Context $context -Force
