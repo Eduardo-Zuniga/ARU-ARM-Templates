@@ -1,0 +1,109 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "String",
+            "metadata": {
+                "description": "Specifies the location in where the resources exist."
+            }
+        },
+        "vaultName": {
+            "type": "String",
+            "metadata": {
+                "description": "Specifies the name of the vault to move."
+            }
+        },
+        "managedIDName": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the managed Identity that will be used by the deployment script."
+            }
+        },
+        "targetRG": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the resource group where the vault should be moved to."
+            }
+        },
+        "baseTemplateStorageAccount": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the storage account where the base template can be retrieved from."
+            }
+        },
+        "storageSAS": {
+            "type": "String",
+            "metadata": {
+                "description": "SAS key for the storage account where the template will be retrieved from."
+            }
+        },
+        "baseTemplateContainerName": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the container where the base template exists."
+            }
+        },
+        "baseTemplateFileName": {
+            "type": "String",
+            "metadata": {
+                "description": "Name of the file in the container that hosts the base template. The file extension needs to be added alongside the name, the expected is a .json file"
+            }
+        },
+        "utcValue": {
+            "defaultValue": "[utcNow()]",
+            "type": "String",
+            "metadata": {
+                "description": "Used to force the script to run again when template is re-deployed."
+            }
+        }
+    },
+    "variables": {
+        "Stepnumber": [
+            "Basic ARM template",
+            "Child resources",
+            "Nested templates",
+            "Multiple instances",
+            "Conditional templates",
+            "Deployment scripts"
+        ],
+        "roleDefName": "[guid(parameters('roleName'))]",
+        "roleAssignmentName": "[guid(resourceGroup().id)]",
+        "roleAssignmentName2": "[guid(resourceGroup().id)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "recreateKeyvault",
+            "location": "[resourceGroup().location]",
+            "kind": "AzurePowerShell",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIDName')))]": {}
+                }
+            },
+            "properties": {
+                "forceUpdateTag": "[parameters('utcValue')]",
+                "azPowerShellVersion": "8.3",
+                "timeout": "PT30M",
+                "arguments": "[format(' -subID {0} -OriginRG {1} -OriginKeyvaultName {2} -TargetRG {3} -storageAccountName {4} -storageAccountSASKey {5} -baseTemplateContainerName {6} -baseTemplateName {7}', subscription().subscriptionId, resourcegroup().name, parameters('vaultName'), parameters('targetRG'), parameters('baseTemplateStorageAccount'), parameters('storageSAS'), parameters('baseTemplateContainerName'), parameters('baseTemplateFileName'))]",
+                "primaryScriptUri": "https://raw.githubusercontent.com/Eduardo-Zuniga/ARU-ARM-Templates/main/Templates/Reference/Vault-Script/moveResources.ps1",
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D"
+            }
+        }
+    ],
+    "outputs": {
+        "RampUpStep": {
+            "type": "String",
+            "value": "[variables('Stepnumber')[5]]"
+        },
+        "result": {
+            "type": "String",
+            "value": "[reference('recreateKeyvault').outputs.text]"
+        }
+    }
+}
