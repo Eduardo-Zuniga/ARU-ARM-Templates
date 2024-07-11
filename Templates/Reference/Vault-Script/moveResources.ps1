@@ -182,8 +182,8 @@ $end =  Get-AzStorageBlobContent -Container $OperationsContainerName -Blob "newA
 Remove-AzKeyVault -Name $vault.ToString() -ResourceGroupName $OriginRG -Force
 
 #Purging the deleted vault 
-$purgeURI = "https://management.azure.com/subscriptions/{0}/providers/Microsoft.KeyVault/locations/{1}/deletedVaults/{2}/purge?api-version=2022-07-01" -f $subID, $vaultLocation, $OriginKeyvaultName 
-Invoke-RestMethod -uri $purgeURI -method Post -headers $authHeader
+$purgeURI = "/subscriptions/{0}/providers/Microsoft.KeyVault/locations/{1}/deletedVaults/{2}/purge?api-version=2022-07-01" -f $subID, $vaultLocation, $OriginKeyvaultName 
+Invoke-azRestMethod -path $purgeURI -method Post 
 
 #Deploy on the new resource group
 New-AzResourceGroupDeployment -Resourcegroupname v-eduardoz -templatefile $end.name -Force
