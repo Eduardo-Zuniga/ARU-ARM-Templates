@@ -114,34 +114,10 @@ $content = Invoke-RestMethod -Uri $restUri -Method Get -Headers $authHeader
 #Saving accesspolicies to prevent type mismatch after multiple conversions to and from Json
 $OriginalProperties = $content
 
-#updating tags for the json file
-#Creation date
-$content.update | Foreach-object {
-    $item = $content.tags.createdOn
-    $date = (Get-Date -Format "| yyyy-MM-dd |").ToString()
-    if ($item.ToString() -ine $date) {
-        $content.tags.createdon = $date
-    }
-}
-
-#Kusto time
-$content.update | Foreach-object {
-    $item = $content.tags.kustoTime
-    $date = (Get-Date -Format "| HH:mm:ss |").ToString()
-    if ($item.ToString() -ine $date) {
-        $content.tags.kustoTime = $date
-    }
-}
-
+#saving name
 $vault = $content.name
-#resource group
-$content.update | Foreach-object {
-    $item = $content.tags.ResourceGroupName
-    if ($item.ToString() -ine $TargetRG) {
-        $content.tags.ResourceGroupName = $TargetRG
-    }
-}
 
+#changing name
 $content.update | Foreach-object {
     $item = $content.name
     if ($content.name.length -lt 19){
@@ -183,28 +159,37 @@ $content.psobject.properties | ForEach-Object {
 }
 
 #Adding the vault to the template resources
-$newtemplate.resources.vaultARU | add-member -NotePropertyMembers $ht2
+$newtemplate.resources.vault | add-member -NotePropertyMembers $ht2
+
+$vaultLocation = $newTemplate.resources.vault.location
 
 #Adding the accesspolicies back to the template to ensure no curruption of data type has happened to the array
-$newtemplate.resources.vaultARU.properties.accesspolicies = $OriginalProperties.properties.accessPolicies
+$newtemplate.resources.vault.properties.accesspolicies = $OriginalProperties.properties.accessPolicies
 
 #Converting template back to Json format
 $deploy = $newTemplate | convertTo-Json -depth 100
 
 # "URL" contains the final template used for deployment
-# "URL2" contains the 
 
 $url = "newAzureDeploy.json"
-set-content -path $url -value $deploy             
-set-content -path $url2 -value $originalproperties.properties.accessPolicies              
+set-content -path $url -value $deploy                       
 Set-AzureStorageBlobContent -Context $Context -Container $OperationsContainerName -File $url -Force
 
 #getting the value of the template itself on a variable and downloading to current context
 $end =  Get-AzStorageBlobContent -Container $OperationsContainerName -Blob "newAzureDeploy.json" -Context $context -Force
 
-#Permanently deleting previous KeyVault
+#Deleting vault, this puts the vault on deleted state, currently all vaults have soft-delete enabled
 Remove-AzKeyVault -Name $vault.ToString() -ResourceGroupName $OriginRG -Force
-Remove-AzKeyVault -Name $vault.ToString() -ResourceGroupName $OriginRG -Force
+
+#Purging the deleted vault 
+
+$purgeURI = "https://management.azure.com/subscriptions/{0}/providers/Microsoft.KeyVault/locations/{1}/deletedVaults/{2}/purge?api-version=2022-07-01" -f $subID, $vaultLocation, $OriginKeyvaultName 
+
+Invoke-RestMethod -uri $purgeURI -method Post -headers $authHeader
+
+
+
+
 
 #Deploy on the new resource group
 New-AzResourceGroupDeployment -Resourcegroupname v-eduardoz -templatefile $end.name -Force
