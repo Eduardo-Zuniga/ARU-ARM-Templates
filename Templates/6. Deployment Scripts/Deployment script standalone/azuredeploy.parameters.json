@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "[resourceGroup().location]"
+        },
+        "vaultName": {
+            "value": "<Your-Vault-name>"
+        },
+        "managedIDName": {
+            "value": "<existing-userAssigned-managedID>"
+        },
+        "targetRG": {
+            "value": "<RG-to-move-to>"
+        },
+        "baseTemplateStorageAccount": {
+            "value": "<your-storage-account>"
+        },
+        "storageSAS": {
+            "value": "<storageAccount-SAS-key>"
+        },
+        "baseTemplateContainerName": {
+            "value": "<baseTemplate-container-name>"
+        },
+        "baseTemplateFileName": {
+            "value": "<baseTemplate-file>"
+        },
+        "utcValue": {
+            "value": "[utcNow()]"
+        }
+    }
+  }
